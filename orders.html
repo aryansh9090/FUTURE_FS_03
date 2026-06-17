@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your Bake 'N' Flake orders in real-time.">
+    <title>My Orders | Bake 'N' Flake</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .page-hero { background: linear-gradient(135deg, var(--chocolate) 0%, var(--chocolate-light) 100%); padding: 7rem 0 3rem; text-align: center; color: var(--cream); }
+        .page-hero h1 { font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 0.5rem; }
+        .page-hero p { font-size: 1.1rem; opacity: 0.85; }
+
+        .orders-container { max-width: 800px; margin: 3rem auto; min-height: 400px; }
+        
+        .no-orders { text-align: center; padding: 4rem 2rem; background: var(--white); border-radius: 16px; box-shadow: var(--shadow-soft); }
+        .no-orders .icon { font-size: 4rem; margin-bottom: 1rem; color: var(--text-muted); opacity: 0.5; }
+        .no-orders h3 { font-family: var(--font-heading); color: var(--chocolate); margin-bottom: 0.5rem; font-size: 1.5rem; }
+        .no-orders p { color: var(--text-muted); margin-bottom: 1.5rem; }
+
+        .orders-list { display: flex; flex-direction: column; gap: 1.5rem; }
+        .order-card { background: var(--white); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-soft); transition: transform 0.3s ease; border: 1px solid var(--cream-dark); }
+        .order-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        
+        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .order-id { font-weight: 700; font-family: var(--font-heading); color: var(--chocolate); font-size: 1.2rem; }
+        .order-date { font-size: 0.9rem; color: var(--text-muted); }
+        
+        .order-details { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        @media (max-width: 600px) { .order-details { grid-template-columns: 1fr; } }
+        
+        .order-info-block h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .order-info-block p { font-size: 0.95rem; line-height: 1.4; color: var(--chocolate); }
+        .order-items-list { list-style: none; padding: 0; margin: 0; }
+        .order-items-list li { display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-size: 0.95rem; }
+        
+        .order-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #ddd; font-weight: 700; }
+        .order-total-price { color: var(--rose-gold); font-size: 1.2rem; }
+
+        .tracking-status { background: var(--cream); padding: 1.2rem; border-radius: 12px; margin-top: 1.5rem; }
+        .status-tracker { display: flex; justify-content: space-between; position: relative; margin-top: 1.5rem; }
+        .status-tracker::before { content: ''; position: absolute; top: 12px; left: 10%; right: 10%; height: 3px; background: #ddd; z-index: 1; }
+        .status-tracker::after { content: ''; position: absolute; top: 12px; left: 10%; width: 0%; height: 3px; background: var(--rose-gold); z-index: 2; transition: width 0.5s ease; }
+        
+        .status-step { position: relative; z-index: 3; text-align: center; width: 33.33%; }
+        .status-dot { width: 26px; height: 26px; border-radius: 50%; background: #ddd; border: 3px solid var(--white); margin: 0 auto 0.5rem; transition: all 0.3s ease; }
+        .status-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; transition: color 0.3s ease; }
+        
+        .status-step.active .status-dot { background: var(--rose-gold); box-shadow: 0 0 0 3px rgba(183,110,121,0.2); }
+        .status-step.active .status-label { color: var(--chocolate); }
+        .status-step.completed .status-dot { background: var(--rose-gold); }
+        
+        /* Dynamic Tracker Widths based on status */
+        .order-card[data-status="preparing"] .status-tracker::after { width: 0%; }
+        .order-card[data-status="preparing"] .status-step:nth-child(1) { @extend .active; }
+        
+        .order-card[data-status="on-way"] .status-tracker::after { width: 50%; }
+        .order-card[data-status="on-way"] .status-step:nth-child(1) .status-dot { background: var(--rose-gold); }
+        .order-card[data-status="on-way"] .status-step:nth-child(2) .status-dot { background: var(--rose-gold); box-shadow: 0 0 0 3px rgba(183,110,121,0.2); }
+        .order-card[data-status="on-way"] .status-step:nth-child(2) .status-label { color: var(--chocolate); }
+        
+        .order-card[data-status="delivered"] .status-tracker::after { width: 100%; }
+        .order-card[data-status="delivered"] .status-step .status-dot { background: #2E7D32; }
+        .order-card[data-status="delivered"] .status-tracker::after { background: #2E7D32; }
+        .order-card[data-status="delivered"] .status-step .status-label { color: #2E7D32; }
+    </style>
+</head>
+<body>
+    <div id="preloader"><div class="loader-content"><span class="loader-icon">🎂</span><h2>Bake 'N' Flake</h2></div></div>
+
+    <nav id="navbar" class="sticky-nav">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Bake 'N' Flake</a></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="#" onclick="openGiftPlanner(event)">🎁 Plan My Gift</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="stores.html">Find Store</a></li>
+                <li><a href="orders.html" class="active">My Orders</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartSidebar()" aria-label="Open Cart">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="cart-sidebar-overlay" id="cartSidebarOverlay" onclick="toggleCartSidebar()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header"><h3>🛒 Your Cart</h3><button class="cart-sidebar-close" onclick="toggleCartSidebar()">&times;</button></div>
+        <div class="cart-sidebar-items" id="cartSidebarItems"><div class="cart-empty-msg">Your cart is empty 🍰</div></div>
+        <div class="cart-sidebar-footer">
+            <div class="cart-sidebar-total">Total: <span id="cartSidebarTotal">₹0</span></div>
+            <button class="btn primary-btn" style="width:100%;margin-top:1rem;" onclick="toggleCartSidebar(); openOrderModal();">Proceed to Order</button>
+        </div>
+    </div>
+
+    <section class="page-hero">
+        <h1>My Orders</h1>
+        <p>Track your sweetness</p>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="orders-container" id="ordersContainer">
+                <!-- Populated by JS -->
+                <div class="no-orders">
+                    <div class="icon">📦</div>
+                    <h3>No Orders Yet</h3>
+                    <p>You haven't placed any orders with us. Time to treat yourself!</p>
+                    <a href="menu.html" class="btn primary-btn">Explore Menu</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer"><div class="container"><div class="footer-content"><div class="footer-logo">Bake 'N' Flake</div><p>&copy; 2026 Bake 'N' Flake. All rights reserved.</p><div class="social-links"><a href="#">Instagram</a><a href="#">Facebook</a></div></div></div></footer>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal-overlay"><div class="modal-container"><button class="close-modal" onclick="closeOrderModal()">&times;</button><div class="modal-header"><h2>Place Your Order</h2><div class="progress-bar"><div class="progress-step active" id="step1-indicator">1</div><div class="progress-line"></div><div class="progress-step" id="step2-indicator">2</div><div class="progress-line"></div><div class="progress-step" id="step3-indicator">3</div><div class="progress-line"></div><div class="progress-step" id="step4-indicator">4</div></div></div><form id="orderForm" onsubmit="submitOrder(event)"><div class="form-step active" id="step1"><h3>Step 1: Your Details</h3><div class="input-group"><input type="text" id="orderName" required placeholder="Full Name"></div><div class="input-group"><input type="tel" id="orderPhone" required placeholder="Phone Number"></div><div class="input-group"><input type="email" id="orderEmail" placeholder="Email (optional)"></div><div class="modal-footer"><button type="button" class="btn primary-btn" onclick="nextStep(2)">Next</button></div></div><div class="form-step" id="step2"><h3>Step 2: Order Details</h3><div class="cart-list" id="cartList"></div><hr class="divider"><div class="order-summary"><div id="summaryItems">No items selected</div><h4 class="total-price" id="totalPrice">Total: ₹0</h4></div><div class="checkbox-group mt-1"><label><input type="checkbox" value="Extra Cheese Frosting"> Extra Cheese Frosting</label><label><input type="checkbox" value="Extra Chocolate Drizzle"> Extra Chocolate Drizzle</label><label><input type="checkbox" value="Sugar-Free Option"> Sugar-Free Option</label><label><input type="checkbox" value="Special Message"> Special Message on Cake</label></div><div class="input-group mt-1"><textarea id="orderInstructions" rows="2" placeholder="Special Instructions (Optional)"></textarea></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(1)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(3)">Next</button></div></div><div class="form-step" id="step3"><h3>Step 3: Delivery Preference</h3><div class="radio-group mt-1"><label><input type="radio" name="deliveryPref" value="pickup" checked onchange="toggleAddress()"> I'll Pick It Up</label><label><input type="radio" name="deliveryPref" value="delivery" onchange="toggleAddress()"> Home Delivery</label></div><div class="input-group hidden" id="addressField"><textarea id="orderAddress" rows="2" placeholder="Delivery Address"></textarea></div><div class="input-group date-time-group mt-1"><input type="date" id="orderDate" required><input type="time" id="orderTime" required></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(2)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(4)">Next</button></div></div><div class="form-step" id="step4"><h3>Step 4: Payment</h3><div class="input-group"><select id="paymentMethod" required onchange="togglePaymentDetails()"><option value="" disabled selected>Select Payment Method...</option><option value="upi">UPI</option><option value="netbanking">Net Banking</option><option value="cod">Cash on Delivery</option></select></div><div id="upiDetails" class="payment-details hidden"><div class="qr-placeholder"><span class="qr-icon">📱</span><p>Scan to Pay</p></div><input type="text" id="upiId" placeholder="Enter UPI ID (e.g. bakenflake@upi)"></div><div id="netBankingDetails" class="payment-details hidden"><select id="bankSelect"><option value="" disabled selected>Select Bank...</option><option value="sbi">State Bank of India</option><option value="hdfc">HDFC Bank</option><option value="icici">ICICI Bank</option><option value="axis">Axis Bank</option></select></div><div id="codDetails" class="payment-details hidden"><label><input type="checkbox" id="codConfirm"> I confirm to pay by cash upon delivery.</label></div><div class="modal-footer mt-1"><button type="button" class="btn secondary-btn" onclick="prevStep(3)">Back</button><button type="submit" class="btn primary-btn">Place Order</button></div></div><div class="form-step" id="successStep"><div class="success-icon">✓</div><h3>Order Confirmed!</h3><p id="successOrderId" style="font-weight:bold;margin-bottom:.5rem;color:var(--rose-gold);"></p><p>Your order has been placed successfully. Track it in My Orders.</p><div class="modal-footer" style="justify-content:center;"><button type="button" class="btn primary-btn" onclick="closeOrderModal()">Close</button></div></div></form></div></div>
+
+    <script src="script.js"></script>
+    <script>
+    (function(){
+        const oc = document.getElementById('ordersContainer');
+        const orders = JSON.parse(localStorage.getItem('bnf_orders') || '[]');
+        
+        if (orders.length > 0) {
+            oc.innerHTML = '<div class="orders-list"></div>';
+            const list = oc.querySelector('.orders-list');
+            
+            orders.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(order => {
+                const items = order.items || {};
+                const itemsHtml = Object.entries(items).map(([name, qty]) => `<li><span>${qty}x ${name}</span></li>`).join('');
+                const addons = order.addons || [];
+                const addonsHtml = addons.length > 0 ? `<p><strong>Add-ons:</strong> ${addons.join(', ')}</p>` : '';
+                const pMethod = order.paymentMethod || 'Unknown';
+                
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.setAttribute('data-status', order.status || 'preparing');
+                
+                card.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">${order.id || '#Unknown'}</span>
+                        <span class="order-date">${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="order-info-block">
+                            <h4>Delivery Details</h4>
+                            <p><strong>Method:</strong> ${order.deliveryPref === 'delivery' ? 'Home Delivery' : 'Pickup'}</p>
+                            ${order.deliveryPref === 'delivery' ? `<p><strong>Address:</strong> ${order.address || 'N/A'}</p>` : ''}
+                            <p><strong>Date & Time:</strong> ${order.orderDate || 'N/A'} at ${order.orderTime || 'N/A'}</p>
+                        </div>
+                        <div class="order-info-block">
+                            <h4>Order Items</h4>
+                            <ul class="order-items-list">${itemsHtml}</ul>
+                            ${addonsHtml}
+                            <p><strong>Payment:</strong> ${pMethod.toUpperCase()}</p>
+                        </div>
+                    </div>
+                    <div class="order-total-row">
+                        <span>Total Amount</span>
+                        <span class="order-total-price">₹${order.total}</span>
+                    </div>
+                    <div class="tracking-status">
+                        <h4 style="margin-bottom:0.5rem;color:var(--chocolate);font-size:0.9rem;">Live Tracking</h4>
+                        <div class="status-tracker">
+                            <div class="status-step active"><div class="status-dot"></div><div class="status-label">Preparing</div></div>
+                            <div class="status-step"><div class="status-dot"></div><div class="status-label">${order.deliveryPref === 'delivery' ? 'On the way' : 'Ready for Pickup'}</div></div>
+                            <div class="status-step"><div class="status-dot"></div><div class="status-label">${order.deliveryPref === 'delivery' ? 'Delivered' : 'Picked Up'}</div></div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            
+            // Simulation loop (same logic as in modal)
+            setInterval(() => {
+                let updated = false;
+                const currentOrders = JSON.parse(localStorage.getItem('bnf_orders') || '[]');
+                currentOrders.forEach(o => {
+                    if(o.status === 'preparing' && Date.now() - o.timestamp > 15000) { o.status = 'on-way'; updated = true; }
+                    if(o.status === 'on-way' && Date.now() - o.timestamp > 30000) { o.status = 'delivered'; updated = true; }
+                });
+                if(updated) {
+                    localStorage.setItem('bnf_orders', JSON.stringify(currentOrders));
+                    // Update UI without full reload
+                    const cards = document.querySelectorAll('.order-card');
+                    currentOrders.forEach((o, i) => {
+                        if(cards[i]) cards[i].setAttribute('data-status', o.status);
+                    });
+                }
+            }, 2000);
+            
+        }
+    })();
+    </script>
+</body>
+</html>

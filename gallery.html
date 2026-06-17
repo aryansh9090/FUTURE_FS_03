@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A sweet world of flavors — view the Bake 'N' Flake gallery of cakes, pastries, and more.">
+    <title>Gallery | Bake 'N' Flake</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .page-hero { background: linear-gradient(135deg, var(--chocolate) 0%, var(--chocolate-light) 100%); padding: 7rem 0 3rem; text-align: center; color: var(--cream); }
+        .page-hero h1 { font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 0.5rem; }
+        .page-hero p { font-size: 1.1rem; opacity: 0.85; }
+
+        .filter-tabs { display: flex; justify-content: center; gap: 0.8rem; margin: 2rem 0 2.5rem; flex-wrap: wrap; }
+        .filter-tab { padding: 0.6rem 1.6rem; border-radius: 30px; border: 2px solid var(--cream-dark); background: var(--white); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: var(--font-body); font-size: 0.95rem; }
+        .filter-tab:hover, .filter-tab.active { background: var(--chocolate); color: var(--cream); border-color: var(--chocolate); }
+
+        .gallery-grid { column-count: 3; column-gap: 1.5rem; margin-top: 2rem; }
+        .gallery-item { break-inside: avoid; margin-bottom: 1.5rem; position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .gallery-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+        .gallery-item img { width: 100%; display: block; border-radius: 16px; transition: transform 0.5s ease; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        
+        .gallery-overlay { position: absolute; inset: 0; background: rgba(62, 39, 35, 0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; color: var(--white); border-radius: 16px; }
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        .gallery-overlay .zoom-icon { font-size: 2rem; margin-bottom: 0.5rem; transform: scale(0.5); transition: transform 0.3s ease; }
+        .gallery-item:hover .zoom-icon { transform: scale(1); }
+        .gallery-overlay .item-name { font-family: var(--font-heading); font-size: 1.2rem; }
+
+        /* Lightbox */
+        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .lightbox-overlay.active { opacity: 1; pointer-events: auto; }
+        .lightbox-content { max-width: 90vw; max-height: 90vh; }
+        .lightbox-content img { max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; font-size: 3rem; color: white; background: none; border: none; cursor: pointer; transition: color 0.3s ease; }
+        .lightbox-close:hover { color: var(--rose-gold); }
+        .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; color: white; font-size: 2rem; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: background 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .lightbox-prev:hover, .lightbox-next:hover { background: var(--rose-gold); }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+
+        @media (max-width: 900px) { .gallery-grid { column-count: 2; } }
+        @media (max-width: 600px) { .gallery-grid { column-count: 1; } .page-hero h1 { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+    <div id="preloader"><div class="loader-content"><span class="loader-icon">🎂</span><h2>Bake 'N' Flake</h2></div></div>
+
+    <nav id="navbar" class="sticky-nav">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Bake 'N' Flake</a></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="#" onclick="openGiftPlanner(event)">🎁 Plan My Gift</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="gallery.html" class="active">Gallery</a></li>
+                <li><a href="stores.html">Find Store</a></li>
+                <li><a href="orders.html">My Orders</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartSidebar()" aria-label="Open Cart">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="cart-sidebar-overlay" id="cartSidebarOverlay" onclick="toggleCartSidebar()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header"><h3>🛒 Your Cart</h3><button class="cart-sidebar-close" onclick="toggleCartSidebar()">&times;</button></div>
+        <div class="cart-sidebar-items" id="cartSidebarItems"><div class="cart-empty-msg">Your cart is empty 🍰</div></div>
+        <div class="cart-sidebar-footer">
+            <div class="cart-sidebar-total">Total: <span id="cartSidebarTotal">₹0</span></div>
+            <button class="btn primary-btn" style="width:100%;margin-top:1rem;" onclick="toggleCartSidebar(); openOrderModal();">Proceed to Order</button>
+        </div>
+    </div>
+
+    <section class="page-hero">
+        <h1>Our Gallery</h1>
+        <p>A sweet world of flavors</p>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-category="All">All</button>
+                <button class="filter-tab" data-category="Cakes">Cakes</button>
+                <button class="filter-tab" data-category="Pastries">Pastries</button>
+                <button class="filter-tab" data-category="Chocolates">Chocolates</button>
+                <button class="filter-tab" data-category="Drinks">Drinks</button>
+                <button class="filter-tab" data-category="Store">Store</button>
+            </div>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="gallery-item" data-cat="Cakes">
+                    <img src="images/menu_cake.png" alt="Signature Cake">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Signature Cake</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Cakes">
+                    <img src="images/menu_cake.png" alt="Chocolate Truffle">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Chocolate Truffle</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Cakes">
+                    <img src="images/menu_cake.png" alt="Strawberry Cake">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Strawberry Cake</div></div>
+                </div>
+                
+                <div class="gallery-item" data-cat="Pastries">
+                    <img src="images/menu_pastry.png" alt="Flaky Pastry">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Flaky Pastry</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Pastries">
+                    <img src="images/menu_pastry.png" alt="Croissant">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Croissant</div></div>
+                </div>
+
+                <div class="gallery-item" data-cat="Chocolates">
+                    <img src="images/menu_chocolate.png" alt="Chocolate Box">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Chocolate Box</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Chocolates">
+                    <img src="images/menu_chocolate.png" alt="Assorted Truffles">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Assorted Truffles</div></div>
+                </div>
+
+                <div class="gallery-item" data-cat="Drinks">
+                    <img src="images/menu_drinks.png" alt="Cold Coffee">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Cold Coffee</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Drinks">
+                    <img src="images/menu_drinks.png" alt="Mango Shake">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Mango Shake</div></div>
+                </div>
+
+                <div class="gallery-item" data-cat="Store">
+                    <img src="images/hero_bakery.png" alt="Our Store">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Our Store</div></div>
+                </div>
+                <div class="gallery-item" data-cat="Store">
+                    <img src="images/about_bakery.png" alt="Inside the Bakery">
+                    <div class="gallery-overlay"><div class="zoom-icon">🔍</div><div class="item-name">Inside the Bakery</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <button class="lightbox-prev" id="lightboxPrev">&#10094;</button>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="Lightbox Image">
+        </div>
+        <button class="lightbox-next" id="lightboxNext">&#10095;</button>
+    </div>
+
+    <footer class="footer"><div class="container"><div class="footer-content"><div class="footer-logo">Bake 'N' Flake</div><p>&copy; 2026 Bake 'N' Flake. All rights reserved.</p><div class="social-links"><a href="#">Instagram</a><a href="#">Facebook</a></div></div></div></footer>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal-overlay"><div class="modal-container"><button class="close-modal" onclick="closeOrderModal()">&times;</button><div class="modal-header"><h2>Place Your Order</h2><div class="progress-bar"><div class="progress-step active" id="step1-indicator">1</div><div class="progress-line"></div><div class="progress-step" id="step2-indicator">2</div><div class="progress-line"></div><div class="progress-step" id="step3-indicator">3</div><div class="progress-line"></div><div class="progress-step" id="step4-indicator">4</div></div></div><form id="orderForm" onsubmit="submitOrder(event)"><div class="form-step active" id="step1"><h3>Step 1: Your Details</h3><div class="input-group"><input type="text" id="orderName" required placeholder="Full Name"></div><div class="input-group"><input type="tel" id="orderPhone" required placeholder="Phone Number"></div><div class="input-group"><input type="email" id="orderEmail" placeholder="Email (optional)"></div><div class="modal-footer"><button type="button" class="btn primary-btn" onclick="nextStep(2)">Next</button></div></div><div class="form-step" id="step2"><h3>Step 2: Order Details</h3><div class="cart-list" id="cartList"></div><hr class="divider"><div class="order-summary"><div id="summaryItems">No items selected</div><h4 class="total-price" id="totalPrice">Total: ₹0</h4></div><div class="checkbox-group mt-1"><label><input type="checkbox" value="Extra Cheese Frosting"> Extra Cheese Frosting</label><label><input type="checkbox" value="Extra Chocolate Drizzle"> Extra Chocolate Drizzle</label><label><input type="checkbox" value="Sugar-Free Option"> Sugar-Free Option</label><label><input type="checkbox" value="Special Message"> Special Message on Cake</label></div><div class="input-group mt-1"><textarea id="orderInstructions" rows="2" placeholder="Special Instructions (Optional)"></textarea></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(1)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(3)">Next</button></div></div><div class="form-step" id="step3"><h3>Step 3: Delivery Preference</h3><div class="radio-group mt-1"><label><input type="radio" name="deliveryPref" value="pickup" checked onchange="toggleAddress()"> I'll Pick It Up</label><label><input type="radio" name="deliveryPref" value="delivery" onchange="toggleAddress()"> Home Delivery</label></div><div class="input-group hidden" id="addressField"><textarea id="orderAddress" rows="2" placeholder="Delivery Address"></textarea></div><div class="input-group date-time-group mt-1"><input type="date" id="orderDate" required><input type="time" id="orderTime" required></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(2)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(4)">Next</button></div></div><div class="form-step" id="step4"><h3>Step 4: Payment</h3><div class="input-group"><select id="paymentMethod" required onchange="togglePaymentDetails()"><option value="" disabled selected>Select Payment Method...</option><option value="upi">UPI</option><option value="netbanking">Net Banking</option><option value="cod">Cash on Delivery</option></select></div><div id="upiDetails" class="payment-details hidden"><div class="qr-placeholder"><span class="qr-icon">📱</span><p>Scan to Pay</p></div><input type="text" id="upiId" placeholder="Enter UPI ID (e.g. bakenflake@upi)"></div><div id="netBankingDetails" class="payment-details hidden"><select id="bankSelect"><option value="" disabled selected>Select Bank...</option><option value="sbi">State Bank of India</option><option value="hdfc">HDFC Bank</option><option value="icici">ICICI Bank</option><option value="axis">Axis Bank</option></select></div><div id="codDetails" class="payment-details hidden"><label><input type="checkbox" id="codConfirm"> I confirm to pay by cash upon delivery.</label></div><div class="modal-footer mt-1"><button type="button" class="btn secondary-btn" onclick="prevStep(3)">Back</button><button type="submit" class="btn primary-btn">Place Order</button></div></div><div class="form-step" id="successStep"><div class="success-icon">✓</div><h3>Order Confirmed!</h3><p id="successOrderId" style="font-weight:bold;margin-bottom:.5rem;color:var(--rose-gold);"></p><p>Your order has been placed successfully. Track it in <a href="orders.html">My Orders</a>.</p><div class="modal-footer" style="justify-content:center;"><button type="button" class="btn primary-btn" onclick="closeOrderModal()">Close</button></div></div></form></div></div>
+
+    <script src="script.js"></script>
+    <script>
+    (function(){
+        // Filter logic
+        const tabs = document.querySelectorAll('.filter-tab');
+        const items = document.querySelectorAll('.gallery-item');
+        let currentItems = Array.from(items);
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const cat = tab.dataset.category;
+                items.forEach(item => {
+                    if (cat === 'All' || item.dataset.cat === cat) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                currentItems = Array.from(items).filter(item => cat === 'All' || item.dataset.cat === cat);
+            });
+        });
+
+        // Lightbox logic
+        const lightbox = document.getElementById('lightboxOverlay');
+        const lightboxImg = document.getElementById('lightboxImage');
+        const closeBtn = document.getElementById('lightboxClose');
+        const prevBtn = document.getElementById('lightboxPrev');
+        const nextBtn = document.getElementById('lightboxNext');
+        let currentIndex = 0;
+
+        items.forEach((item) => {
+            item.addEventListener('click', () => {
+                const visibleItems = currentItems;
+                currentIndex = visibleItems.indexOf(item);
+                const imgSrc = item.querySelector('img').src;
+                lightboxImg.src = imgSrc;
+                lightbox.classList.add('active');
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if(e.target === lightbox) lightbox.classList.remove('active');
+        });
+
+        function showImage(index) {
+            if (index < 0) index = currentItems.length - 1;
+            if (index >= currentItems.length) index = 0;
+            currentIndex = index;
+            lightboxImg.src = currentItems[currentIndex].querySelector('img').src;
+        }
+
+        prevBtn.addEventListener('click', () => showImage(currentIndex - 1));
+        nextBtn.addEventListener('click', () => showImage(currentIndex + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'Escape') lightbox.classList.remove('active');
+            if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
+            if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+        });
+
+    })();
+    </script>
+</body>
+</html>

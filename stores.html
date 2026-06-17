@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find a Bake 'N' Flake store near you.">
+    <title>Find Store | Bake 'N' Flake</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .page-hero { background: linear-gradient(135deg, var(--chocolate) 0%, var(--chocolate-light) 100%); padding: 7rem 0 3rem; text-align: center; color: var(--cream); }
+        .page-hero h1 { font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 0.5rem; }
+        .page-hero p { font-size: 1.1rem; opacity: 0.85; }
+
+        .store-locator-layout { display: grid; grid-template-columns: 1fr 1.3fr; gap: 2.5rem; align-items: start; margin-top: 3rem; }
+        .store-cards-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+        .store-card { background: var(--white); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-soft); border: 2px solid transparent; border-left-width: 4px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; cursor: pointer; }
+        .store-card:hover, .store-card.active-card { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-left-color: var(--rose-gold); }
+        
+        .store-card-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .store-icon { font-size: 2rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--cream); border-radius: 12px; flex-shrink: 0; }
+        .store-header-info { flex: 1; }
+        .store-header-info h3 { font-size: 1.1rem; margin-bottom: 0.3rem; color: var(--chocolate); }
+        
+        .store-badge { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 12px; letter-spacing: 0.4px; }
+        .open-badge { background: #E8F5E9; color: #2E7D32; }
+        .closed-badge { background: #FFEBEE; color: #C62828; }
+        
+        .store-distance { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .main-branch-tag { background: linear-gradient(135deg, var(--rose-gold), var(--rose-gold-dark)); color: #fff; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; }
+        
+        .store-details { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.2rem; }
+        .store-detail-row { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+        .store-detail-icon { flex-shrink: 0; font-size: 1rem; }
+        .store-dir-btn { display: inline-block; font-size: 0.9rem; padding: 0.6rem 1.4rem; border-radius: 8px; text-decoration: none; text-align: center; }
+
+        .store-map-panel { position: sticky; top: 90px; }
+        .map-wrapper { height: 600px; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-hover); border: 3px solid var(--cream-dark); }
+        .map-wrapper iframe { width: 100%; height: 100%; display: block; border: 0; }
+        .map-info-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; padding: 0.7rem 1rem; background: var(--white); border-radius: 10px; box-shadow: var(--shadow-soft); font-size: 0.88rem; color: var(--text-muted); }
+        .map-open-link { color: var(--rose-gold); font-weight: 600; font-size: 0.88rem; text-decoration: none; }
+        .map-open-link:hover { color: var(--rose-gold-dark); text-decoration: underline; }
+
+        @media (max-width: 900px) {
+            .store-locator-layout { grid-template-columns: 1fr; }
+            .store-map-panel { position: static; margin-bottom: 2rem; }
+            .map-wrapper { height: 400px; }
+            .store-locator-layout { display: flex; flex-direction: column-reverse; } /* map on top on mobile */
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader"><div class="loader-content"><span class="loader-icon">🎂</span><h2>Bake 'N' Flake</h2></div></div>
+
+    <nav id="navbar" class="sticky-nav">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Bake 'N' Flake</a></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="#" onclick="openGiftPlanner(event)">🎁 Plan My Gift</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="stores.html" class="active">Find Store</a></li>
+                <li><a href="orders.html">My Orders</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartSidebar()" aria-label="Open Cart">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="cart-sidebar-overlay" id="cartSidebarOverlay" onclick="toggleCartSidebar()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header"><h3>🛒 Your Cart</h3><button class="cart-sidebar-close" onclick="toggleCartSidebar()">&times;</button></div>
+        <div class="cart-sidebar-items" id="cartSidebarItems"><div class="cart-empty-msg">Your cart is empty 🍰</div></div>
+        <div class="cart-sidebar-footer">
+            <div class="cart-sidebar-total">Total: <span id="cartSidebarTotal">₹0</span></div>
+            <button class="btn primary-btn" style="width:100%;margin-top:1rem;" onclick="toggleCartSidebar(); openOrderModal();">Proceed to Order</button>
+        </div>
+    </div>
+
+    <section class="page-hero">
+        <h1>Find Our Store</h1>
+        <p>We're always close by!</p>
+    </section>
+
+    <section class="section reveal">
+        <div class="container">
+            <div class="store-locator-layout">
+                <!-- Left: Store Cards -->
+                <div class="store-cards-panel">
+                    <!-- Store Card 1 -->
+                    <div class="store-card active-card" data-lat="23.372320" data-lng="85.308434" data-title="Bariatu Main Store">
+                        <div class="store-card-top">
+                            <div class="store-icon">🏪</div>
+                            <div class="store-header-info">
+                                <h3>Bariatu Main Store</h3>
+                                <span class="store-badge open-badge">🟢 Open</span>
+                            </div>
+                            <div class="store-distance main-branch-tag">Main Branch</div>
+                        </div>
+                        <div class="store-details">
+                            <div class="store-detail-row"><span class="store-detail-icon">📍</span><span>Opposite DAV Public School, Bariatu Housing Colony, Bariatu, Ranchi</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">🕒</span><span>Open 10AM – 9PM, All Days</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">📞</span><span>+91 98765 43210</span></div>
+                        </div>
+                        <a href="https://www.google.com/maps?q=Bariatu+Housing+Colony,+Ranchi" target="_blank" class="btn primary-btn store-dir-btn">🗺️ Get Directions</a>
+                    </div>
+
+                    <!-- Store Card 2 -->
+                    <div class="store-card" data-lat="23.3685" data-lng="85.3256" data-title="Lalpur Outlet">
+                        <div class="store-card-top">
+                            <div class="store-icon">🏬</div>
+                            <div class="store-header-info">
+                                <h3>Lalpur Outlet</h3>
+                                <span class="store-badge open-badge">🟢 Open</span>
+                            </div>
+                            <div class="store-distance">3.2 km away</div>
+                        </div>
+                        <div class="store-details">
+                            <div class="store-detail-row"><span class="store-detail-icon">📍</span><span>Near Lalpur Chowk, Lalpur, Ranchi</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">🕒</span><span>Open 10AM – 8PM, All Days</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">📞</span><span>+91 98765 43211</span></div>
+                        </div>
+                        <a href="https://www.google.com/maps?q=Lalpur+Chowk,+Ranchi" target="_blank" class="btn primary-btn store-dir-btn">🗺️ Get Directions</a>
+                    </div>
+
+                    <!-- Store Card 3 -->
+                    <div class="store-card" data-lat="23.4021" data-lng="85.3189" data-title="Kanke Road Outlet">
+                        <div class="store-card-top">
+                            <div class="store-icon">🏬</div>
+                            <div class="store-header-info">
+                                <h3>Kanke Road Outlet</h3>
+                                <span class="store-badge closed-badge">🔴 Closed</span>
+                            </div>
+                            <div class="store-distance">5.1 km away</div>
+                        </div>
+                        <div class="store-details">
+                            <div class="store-detail-row"><span class="store-detail-icon">📍</span><span>Near Kanke Road, Ranchi, Jharkhand</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">🕒</span><span>Open 11AM – 9PM, All Days</span></div>
+                            <div class="store-detail-row"><span class="store-detail-icon">📞</span><span>+91 98765 43212</span></div>
+                        </div>
+                        <a href="https://www.google.com/maps?q=Kanke+Road,+Ranchi" target="_blank" class="btn primary-btn store-dir-btn">🗺️ Get Directions</a>
+                    </div>
+                </div>
+
+                <!-- Right: Embedded Map -->
+                <div class="store-map-panel">
+                    <div class="map-wrapper">
+                        <iframe id="storeMap" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3661.0452342671846!2d85.30843437516857!3d23.37232007901938!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f4e10f73d2afb1%3A0x3e6e5a5d2e6b0c3a!2sBariatu%2C%20Ranchi%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1718600000000!5m2!1sen!2sin" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Bake 'N' Flake Store Location Map"></iframe>
+                    </div>
+                    <div class="map-info-bar">
+                        <span id="mapInfoLabel">📍 Bariatu Housing Colony, Ranchi, Jharkhand</span>
+                        <a id="mapOpenLink" href="https://www.google.com/maps?q=Bariatu+Housing+Colony,+Ranchi" target="_blank" class="map-open-link">Open in Maps ↗</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal-overlay"><div class="modal-container"><button class="close-modal" onclick="closeOrderModal()">&times;</button><div class="modal-header"><h2>Place Your Order</h2><div class="progress-bar"><div class="progress-step active" id="step1-indicator">1</div><div class="progress-line"></div><div class="progress-step" id="step2-indicator">2</div><div class="progress-line"></div><div class="progress-step" id="step3-indicator">3</div><div class="progress-line"></div><div class="progress-step" id="step4-indicator">4</div></div></div><form id="orderForm" onsubmit="submitOrder(event)"><div class="form-step active" id="step1"><h3>Step 1: Your Details</h3><div class="input-group"><input type="text" id="orderName" required placeholder="Full Name"></div><div class="input-group"><input type="tel" id="orderPhone" required placeholder="Phone Number"></div><div class="input-group"><input type="email" id="orderEmail" placeholder="Email (optional)"></div><div class="modal-footer"><button type="button" class="btn primary-btn" onclick="nextStep(2)">Next</button></div></div><div class="form-step" id="step2"><h3>Step 2: Order Details</h3><div class="cart-list" id="cartList"></div><hr class="divider"><div class="order-summary"><div id="summaryItems">No items selected</div><h4 class="total-price" id="totalPrice">Total: ₹0</h4></div><div class="checkbox-group mt-1"><label><input type="checkbox" value="Extra Cheese Frosting"> Extra Cheese Frosting</label><label><input type="checkbox" value="Extra Chocolate Drizzle"> Extra Chocolate Drizzle</label><label><input type="checkbox" value="Sugar-Free Option"> Sugar-Free Option</label><label><input type="checkbox" value="Special Message"> Special Message on Cake</label></div><div class="input-group mt-1"><textarea id="orderInstructions" rows="2" placeholder="Special Instructions (Optional)"></textarea></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(1)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(3)">Next</button></div></div><div class="form-step" id="step3"><h3>Step 3: Delivery Preference</h3><div class="radio-group mt-1"><label><input type="radio" name="deliveryPref" value="pickup" checked onchange="toggleAddress()"> I'll Pick It Up</label><label><input type="radio" name="deliveryPref" value="delivery" onchange="toggleAddress()"> Home Delivery</label></div><div class="input-group hidden" id="addressField"><textarea id="orderAddress" rows="2" placeholder="Delivery Address"></textarea></div><div class="input-group date-time-group mt-1"><input type="date" id="orderDate" required><input type="time" id="orderTime" required></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(2)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(4)">Next</button></div></div><div class="form-step" id="step4"><h3>Step 4: Payment</h3><div class="input-group"><select id="paymentMethod" required onchange="togglePaymentDetails()"><option value="" disabled selected>Select Payment Method...</option><option value="upi">UPI</option><option value="netbanking">Net Banking</option><option value="cod">Cash on Delivery</option></select></div><div id="upiDetails" class="payment-details hidden"><div class="qr-placeholder"><span class="qr-icon">📱</span><p>Scan to Pay</p></div><input type="text" id="upiId" placeholder="Enter UPI ID (e.g. bakenflake@upi)"></div><div id="netBankingDetails" class="payment-details hidden"><select id="bankSelect"><option value="" disabled selected>Select Bank...</option><option value="sbi">State Bank of India</option><option value="hdfc">HDFC Bank</option><option value="icici">ICICI Bank</option><option value="axis">Axis Bank</option></select></div><div id="codDetails" class="payment-details hidden"><label><input type="checkbox" id="codConfirm"> I confirm to pay by cash upon delivery.</label></div><div class="modal-footer mt-1"><button type="button" class="btn secondary-btn" onclick="prevStep(3)">Back</button><button type="submit" class="btn primary-btn">Place Order</button></div></div><div class="form-step" id="successStep"><div class="success-icon">✓</div><h3>Order Confirmed!</h3><p id="successOrderId" style="font-weight:bold;margin-bottom:.5rem;color:var(--rose-gold);"></p><p>Your order has been placed successfully. Track it in <a href="orders.html">My Orders</a>.</p><div class="modal-footer" style="justify-content:center;"><button type="button" class="btn primary-btn" onclick="closeOrderModal()">Close</button></div></div></form></div></div>
+
+    <footer class="footer"><div class="container"><div class="footer-content"><div class="footer-logo">Bake 'N' Flake</div><p>&copy; 2026 Bake 'N' Flake. All rights reserved.</p><div class="social-links"><a href="#">Instagram</a><a href="#">Facebook</a></div></div></div></footer>
+
+    <script src="script.js"></script>
+    <script>
+    (function(){
+        const cards = document.querySelectorAll('.store-card');
+        const mapInfoLabel = document.getElementById('mapInfoLabel');
+        const mapOpenLink = document.getElementById('mapOpenLink');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                cards.forEach(c => c.classList.remove('active-card'));
+                card.classList.add('active-card');
+                
+                // Update map info bar based on card content
+                const address = card.querySelector('.store-detail-row span:nth-child(2)').textContent;
+                const url = card.querySelector('.store-dir-btn').href;
+                
+                mapInfoLabel.innerHTML = `📍 ${address}`;
+                mapOpenLink.href = url;
+                
+                // Note: Changing iframe src dynamically cross-origin with Google Maps requires API keys or valid embed URLs for each location.
+                // For this demo, we'll keep the static Bariatu map or just show the interaction visually.
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore the Bake 'N' Flake menu — premium cakes, pastries, chocolates & drinks in Ranchi.">
+    <title>Menu | Bake 'N' Flake</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .page-hero{background:linear-gradient(135deg,var(--chocolate) 0%,var(--chocolate-light) 100%);padding:7rem 0 3rem;text-align:center;color:var(--cream)}
+        .page-hero h1{font-family:var(--font-heading);font-size:2.8rem;margin-bottom:.5rem}
+        .page-hero p{font-size:1.1rem;opacity:.85}
+
+        .filter-tabs{display:flex;justify-content:center;gap:.8rem;margin:2rem 0 2.5rem;flex-wrap:wrap}
+        .filter-tab{padding:.6rem 1.6rem;border-radius:30px;border:2px solid var(--cream-dark);background:var(--white);color:var(--text-muted);font-weight:600;cursor:pointer;transition:all .3s ease;font-family:var(--font-body);font-size:.95rem}
+        .filter-tab:hover,.filter-tab.active{background:var(--chocolate);color:var(--cream);border-color:var(--chocolate)}
+
+        .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2rem}
+        .product-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-soft);transition:transform .3s ease,box-shadow .3s ease;display:flex;flex-direction:column}
+        .product-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover)}
+        .product-card-top{background:var(--cream);padding:2rem;text-align:center;font-size:3.5rem;line-height:1}
+        .product-card-body{padding:1.5rem;flex:1;display:flex;flex-direction:column}
+        .product-card-body h3{font-size:1.15rem;margin-bottom:.4rem;color:var(--chocolate)}
+        .product-card-body .desc{font-size:.9rem;color:var(--text-muted);margin-bottom:1rem;flex:1}
+        .product-card-body .price{font-size:1.2rem;font-weight:700;color:var(--rose-gold);margin-bottom:1rem}
+        .add-cart-btn{width:100%;padding:.7rem;border:none;border-radius:10px;background:var(--chocolate);color:var(--cream);font-weight:600;cursor:pointer;transition:all .3s ease;font-family:var(--font-body);font-size:.95rem}
+        .add-cart-btn:hover{background:var(--rose-gold)}
+        .add-cart-btn.added{background:#2E7D32;pointer-events:none}
+
+        .no-results-msg{text-align:center;padding:3rem;color:var(--text-muted);font-size:1.1rem;display:none}
+        .no-results-msg span{display:block;font-size:3rem;margin-bottom:.8rem}
+
+        .floating-cart{position:fixed;bottom:2rem;right:2rem;width:60px;height:60px;border-radius:50%;background:var(--chocolate);color:var(--cream);font-size:1.6rem;border:none;cursor:pointer;box-shadow:0 8px 25px rgba(62,39,35,.3);z-index:900;transition:transform .3s ease;display:flex;align-items:center;justify-content:center}
+        .floating-cart:hover{transform:scale(1.1)}
+        .floating-cart .fc-badge{position:absolute;top:-4px;right:-4px;background:var(--rose-gold);color:#fff;font-size:.7rem;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+        @media(max-width:600px){.page-hero h1{font-size:2rem}.products-grid{grid-template-columns:1fr 1fr;gap:1rem}.product-card-top{padding:1.2rem;font-size:2.5rem}.product-card-body{padding:1rem}}
+    </style>
+</head>
+<body>
+    <div id="preloader"><div class="loader-content"><span class="loader-icon">🎂</span><h2>Bake 'N' Flake</h2></div></div>
+
+    <nav id="navbar" class="sticky-nav">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Bake 'N' Flake</a></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html" class="active">Menu</a></li>
+                <li><a href="#" onclick="openGiftPlanner(event)">🎁 Plan My Gift</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="stores.html">Find Store</a></li>
+                <li><a href="orders.html">My Orders</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartSidebar()" aria-label="Open Cart">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+                <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="cart-sidebar-overlay" id="cartSidebarOverlay" onclick="toggleCartSidebar()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header"><h3>🛒 Your Cart</h3><button class="cart-sidebar-close" onclick="toggleCartSidebar()">&times;</button></div>
+        <div class="cart-sidebar-items" id="cartSidebarItems"><div class="cart-empty-msg">Your cart is empty 🍰</div></div>
+        <div class="cart-sidebar-footer">
+            <div class="cart-sidebar-total">Total: <span id="cartSidebarTotal">₹0</span></div>
+            <button class="btn primary-btn" style="width:100%;margin-top:1rem;" onclick="toggleCartSidebar(); openOrderModal();">Proceed to Order</button>
+        </div>
+    </div>
+
+    <section class="page-hero">
+        <h1>Our Menu</h1>
+        <p>Freshly baked, lovingly crafted — every single day</p>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="search-bar-wrapper">
+                <div class="search-bar-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="menuSearchInput" class="menu-search-bar" placeholder="Search cakes, pastries, chocolates..." autocomplete="off">
+                    <button class="search-clear-btn" id="searchClearBtn" onclick="clearMenuSearch()">&times;</button>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-category="All">All</button>
+                <button class="filter-tab" data-category="Cakes">🎂 Cakes</button>
+                <button class="filter-tab" data-category="Pastries">🥐 Pastries</button>
+                <button class="filter-tab" data-category="Chocolates">🍫 Chocolates</button>
+                <button class="filter-tab" data-category="Drinks">🥤 Drinks</button>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <div class="product-card" data-cat="Cakes"><div class="product-card-top">🎂</div><div class="product-card-body"><h3>Signature Cake</h3><p class="desc">A masterpiece with layers of rich cream & chocolate ganache</p><p class="price">₹899</p><button class="add-cart-btn" onclick="addToCart('Signature Cake',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Cakes"><div class="product-card-top">🍫</div><div class="product-card-body"><h3>Chocolate Truffle Cake</h3><p class="desc">Decadent chocolate layers with silky ganache</p><p class="price">₹799</p><button class="add-cart-btn" onclick="addToCart('Chocolate Truffle Cake',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Cakes"><div class="product-card-top">🎂</div><div class="product-card-body"><h3>Black Forest Cake</h3><p class="desc">Classic cherries, whipped cream & chocolate layers</p><p class="price">₹699</p><button class="add-cart-btn" onclick="addToCart('Black Forest Cake',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Cakes"><div class="product-card-top">🍓</div><div class="product-card-body"><h3>Strawberry Cake</h3><p class="desc">Fresh strawberries & whipped cream, simply divine</p><p class="price">₹749</p><button class="add-cart-btn" onclick="addToCart('Strawberry Cake',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Pastries"><div class="product-card-top">🥐</div><div class="product-card-body"><h3>Flaky Pastry</h3><p class="desc">Buttery, golden, melt-in-your-mouth goodness</p><p class="price">₹49</p><button class="add-cart-btn" onclick="addToCart('Flaky Pastry',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Pastries"><div class="product-card-top">🥐</div><div class="product-card-body"><h3>Croissant</h3><p class="desc">Crispy outside, soft inside, baked fresh daily</p><p class="price">₹59</p><button class="add-cart-btn" onclick="addToCart('Croissant',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Chocolates"><div class="product-card-top">🍫</div><div class="product-card-body"><h3>Chocolate Box</h3><p class="desc">Hand-crafted assorted premium chocolates</p><p class="price">₹199</p><button class="add-cart-btn" onclick="addToCart('Chocolate Box',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Drinks"><div class="product-card-top">☕</div><div class="product-card-body"><h3>Cold Coffee</h3><p class="desc">Chilled, creamy, and perfectly brewed</p><p class="price">₹99</p><button class="add-cart-btn" onclick="addToCart('Cold Coffee',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Drinks"><div class="product-card-top">🥭</div><div class="product-card-body"><h3>Mango Shake</h3><p class="desc">Fresh Alphonso mangoes blended to perfection</p><p class="price">₹89</p><button class="add-cart-btn" onclick="addToCart('Mango Shake',this)">+ Add to Cart</button></div></div>
+                <div class="product-card" data-cat="Cakes"><div class="product-card-top">🎂</div><div class="product-card-body"><h3>Custom Cake</h3><p class="desc">Your dream cake, made exactly how you want it</p><p class="price">₹1200</p><button class="add-cart-btn" onclick="addToCart('Custom Cake',this)">+ Add to Cart</button></div></div>
+            </div>
+            <div class="no-results-msg" id="noResultsMsg"><span>🍰</span>No items found. Try a different search!</div>
+        </div>
+    </section>
+
+    <button class="floating-cart" onclick="toggleCartSidebar()">🛒<span class="fc-badge" id="fcBadge">0</span></button>
+
+    <footer class="footer"><div class="container"><div class="footer-content"><div class="footer-logo">Bake 'N' Flake</div><p>&copy; 2026 Bake 'N' Flake. All rights reserved.</p><div class="social-links"><a href="#">Instagram</a><a href="#">Facebook</a></div></div></div></footer>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal-overlay"><div class="modal-container"><button class="close-modal" onclick="closeOrderModal()">&times;</button><div class="modal-header"><h2>Place Your Order</h2><div class="progress-bar"><div class="progress-step active" id="step1-indicator">1</div><div class="progress-line"></div><div class="progress-step" id="step2-indicator">2</div><div class="progress-line"></div><div class="progress-step" id="step3-indicator">3</div><div class="progress-line"></div><div class="progress-step" id="step4-indicator">4</div></div></div><form id="orderForm" onsubmit="submitOrder(event)"><div class="form-step active" id="step1"><h3>Step 1: Your Details</h3><div class="input-group"><input type="text" id="orderName" required placeholder="Full Name"></div><div class="input-group"><input type="tel" id="orderPhone" required placeholder="Phone Number"></div><div class="input-group"><input type="email" id="orderEmail" placeholder="Email (optional)"></div><div class="modal-footer"><button type="button" class="btn primary-btn" onclick="nextStep(2)">Next</button></div></div><div class="form-step" id="step2"><h3>Step 2: Order Details</h3><div class="cart-list" id="cartList"></div><hr class="divider"><div class="order-summary"><div id="summaryItems">No items selected</div><h4 class="total-price" id="totalPrice">Total: ₹0</h4></div><div class="checkbox-group mt-1"><label><input type="checkbox" value="Extra Cheese Frosting"> Extra Cheese Frosting</label><label><input type="checkbox" value="Extra Chocolate Drizzle"> Extra Chocolate Drizzle</label><label><input type="checkbox" value="Sugar-Free Option"> Sugar-Free Option</label><label><input type="checkbox" value="Special Message"> Special Message on Cake</label></div><div class="input-group mt-1"><textarea id="orderInstructions" rows="2" placeholder="Special Instructions (Optional)"></textarea></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(1)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(3)">Next</button></div></div><div class="form-step" id="step3"><h3>Step 3: Delivery Preference</h3><div class="radio-group mt-1"><label><input type="radio" name="deliveryPref" value="pickup" checked onchange="toggleAddress()"> I'll Pick It Up</label><label><input type="radio" name="deliveryPref" value="delivery" onchange="toggleAddress()"> Home Delivery</label></div><div class="input-group hidden" id="addressField"><textarea id="orderAddress" rows="2" placeholder="Delivery Address"></textarea></div><div class="modal-footer"><button type="button" class="btn secondary-btn" onclick="prevStep(2)">Back</button><button type="button" class="btn primary-btn" onclick="nextStep(4)">Next</button></div></div><div class="form-step" id="step4"><h3>Step 4: Payment</h3><div class="input-group"><select id="paymentMethod" required onchange="togglePaymentDetails()"><option value="" disabled selected>Select Payment Method...</option><option value="upi">UPI</option><option value="netbanking">Net Banking</option><option value="cod">Cash on Delivery</option></select></div><div id="upiDetails" class="payment-details hidden"><div class="qr-placeholder"><span class="qr-icon">📱</span><p>Scan to Pay</p></div><input type="text" id="upiId" placeholder="Enter UPI ID (e.g. bakenflake@upi)"></div><div id="netBankingDetails" class="payment-details hidden"><select id="bankSelect"><option value="" disabled selected>Select Bank...</option><option value="sbi">State Bank of India</option><option value="hdfc">HDFC Bank</option><option value="icici">ICICI Bank</option><option value="axis">Axis Bank</option></select></div><div id="codDetails" class="payment-details hidden"><label><input type="checkbox" id="codConfirm"> I confirm to pay by cash upon delivery.</label></div><div class="modal-footer mt-1"><button type="button" class="btn secondary-btn" onclick="prevStep(3)">Back</button><button type="submit" class="btn primary-btn">Place Order</button></div></div><div class="form-step" id="successStep"><div class="success-icon">✓</div><h3>Order Confirmed!</h3><p id="successOrderId" style="font-weight:bold;margin-bottom:.5rem;color:var(--rose-gold);"></p><p>Your order has been placed successfully. Track it in <a href="orders.html">My Orders</a>.</p><div class="modal-footer" style="justify-content:center;"><button type="button" class="btn primary-btn" onclick="closeOrderModal()">Close</button></div></div></form></div></div>
+
+    <script src="script.js"></script>
+    <script>
+    (function(){
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab=>{
+            tab.addEventListener('click',()=>{
+                document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                filterProducts(tab.dataset.category);
+            });
+        });
+        function filterProducts(cat){
+            let visible=0;
+            document.querySelectorAll('.product-card').forEach(card=>{
+                if(cat==='All'||card.dataset.cat===cat){card.style.display='';visible++}
+                else{card.style.display='none'}
+            });
+            document.getElementById('noResultsMsg').style.display=visible===0?'block':'none';
+        }
+        // Search
+        const si=document.getElementById('menuSearchInput');
+        const cb=document.getElementById('searchClearBtn');
+        if(si){
+            si.addEventListener('input',()=>{
+                const q=si.value.trim().toLowerCase();
+                cb.classList.toggle('visible',q.length>0);
+                let visible=0;
+                document.querySelectorAll('.product-card').forEach(card=>{
+                    const name=card.querySelector('h3').textContent.toLowerCase();
+                    const desc=card.querySelector('.desc').textContent.toLowerCase();
+                    if(name.includes(q)||desc.includes(q)){card.style.display='';visible++}
+                    else{card.style.display='none'}
+                });
+                document.getElementById('noResultsMsg').style.display=visible===0?'block':'none';
+                document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+                document.querySelector('.filter-tab[data-category="All"]').classList.add('active');
+            });
+        }
+        window.clearMenuSearch=()=>{si.value='';cb.classList.remove('visible');filterProducts('All')};
+
+    })();
+    </script>
+</body>
+</html>
